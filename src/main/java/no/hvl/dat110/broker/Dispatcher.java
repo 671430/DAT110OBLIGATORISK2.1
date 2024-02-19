@@ -92,7 +92,8 @@ public class Dispatcher extends Stopable {
 		Logger.log("onConnect:" + msg.toString());
 
 		storage.addClientSession(user, connection);
-
+		
+		
 	}
 
 	// called by dispatch upon receiving a disconnect message
@@ -113,8 +114,7 @@ public class Dispatcher extends Stopable {
 		// TODO: create the topic in the broker storage
 		// the topic is contained in the create topic message
 
-		throw new UnsupportedOperationException(TODO.method());
-
+		 storage.createTopic(msg.getTopic());
 	}
 
 	public void onDeleteTopic(DeleteTopicMsg msg) {
@@ -122,9 +122,8 @@ public class Dispatcher extends Stopable {
 		Logger.log("onDeleteTopic:" + msg.toString());
 
 		// TODO: delete the topic from the broker storage
-		// the topic is contained in the delete topic message
+		storage.deleteTopic(msg.getTopic());
 		
-		throw new UnsupportedOperationException(TODO.method());
 	}
 
 	public void onSubscribe(SubscribeMsg msg) {
@@ -134,7 +133,7 @@ public class Dispatcher extends Stopable {
 		// TODO: subscribe user to the topic
 		// user and topic is contained in the subscribe message
 		
-		throw new UnsupportedOperationException(TODO.method());
+		storage.addSubscriber(msg.getUser(), msg.getTopic());
 
 	}
 
@@ -145,7 +144,7 @@ public class Dispatcher extends Stopable {
 		// TODO: unsubscribe user to the topic
 		// user and topic is contained in the unsubscribe message
 		
-		throw new UnsupportedOperationException(TODO.method());
+		storage.removeSubscriber(msg.getUser(), msg.getTopic());
 	}
 
 	public void onPublish(PublishMsg msg) {
@@ -156,7 +155,32 @@ public class Dispatcher extends Stopable {
 		// topic and message is contained in the subscribe message
 		// messages must be sent using the corresponding client session objects
 		
-		throw new UnsupportedOperationException(TODO.method());
+		// TODO: publish the message to clients subscribed to the topic
+//		 String topic = msg.getTopic();
 
-	}
-}
+		    // Get all subscribers to the topic
+		    Set<String> subscribers = storage.getSubscribers(msg.getTopic());
+
+		    if (subscribers != null) {
+		        // Iterate over all subscribers
+		        for (String subscriber : subscribers) {
+		        	this.storage.getSession(subscriber).send(msg);
+//		             Retrieve the session for each subscriber
+//		            ClientSession session = storage.getSession(subscriber);
+//
+//		            // Check if the session exists (implicitly checks for connection)
+//		            if (session != null) {
+////		                 Publish the message to the subscriber
+//		                try {
+//		                    session.send(msg);
+//		                } catch (Exception e) {
+//		                    Logger.log("Error sending message to subscriber " + subscriber + ": " + e.getMessage());
+////		                     Handle or log the error appropriately
+////		                     This could include removing the session if it's considered disconnected
+//		                }
+		        	
+		            }
+		        }
+		    }
+		}
+
